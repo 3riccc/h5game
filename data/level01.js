@@ -1,0 +1,20 @@
+var level01 = [  
+    {  
+        type:Road.TYPE.Ground,  
+        groundWidth:200,  
+        groundHeight:50,  
+        terrain:Road.TERRAIN.Smooth  
+    },  
+    {  
+        type:Road.TYPE.Bridge,  
+        plankWidth:50,  
+        plankHeight:25,  
+        plankAmount:10  
+    },  
+    {  
+        type:Road.TYPE.Ground,  
+        groundWidth:600,  
+        groundHeight:50,  
+        terrain:Road.TERRAIN.Smooth  
+    }  
+]; 
