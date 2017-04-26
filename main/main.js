@@ -8,8 +8,8 @@ function Main(){
 	base(s,LSprite,[]);
 
 	/**设置场景大小*/
-	s.sceneWidth = 8500;
-	s.sceneHeight = LStage.height+1000;
+	s.sceneWidth = 800;
+	s.sceneHeight = 450;
 }
 Main.prototype.init = function(){
 	var s = this;
@@ -22,6 +22,9 @@ Main.prototype.init = function(){
 	s.addBicycle();
 	/**加入循环事件*/
 	s.addEventListener(LEvent.ENTER_FRAME,s.loop);
+	LEvent.addEventListener(window,LKeyboardEvent.KEY_DOWN,function(e){
+		s.onKeydown(e,s.bicycleObj);
+	});
 };
 Main.prototype.addBorder = function(){
 	var s = this;
@@ -62,16 +65,62 @@ Main.prototype.addRoad = function(){
 	s.addChild(roadObj);
 };
 Main.prototype.addBicycle = function(){
+	var radius = 30;
 	var s = this;
 
 	//创建自行车对象
 	s.bicycleObj = new LSprite();
 	s.bicycleObj.x = 50;
-	s.bicycleObj.y = 385;
-	s.bicycleObj.addBodyCircle(30,30,30,1);
-	s.bicycleObj.setBodyMouseJoint(true);
+	s.bicycleObj.y = 400;
+	s.bicycleObj.addBodyCircle(radius,30,30,1);
+	s.bicycleObj.setBodyMouseJoint(false);
+	
+	window.gun = s.bicycleObj;
 	s.addChild(s.bicycleObj);
+
 };
+
+Main.prototype.onKeydown = function(e,obj){
+	// 力度
+	var force = 1000;
+	if(!!window.angle){
+		// 角度 
+		if(e.keyCode == 65){
+			window.angle = window.angle + 1;
+		}else if(e.keyCode == 90){
+			window.angle = window.angle - 1;
+		}else if(e.keyCode == 88){
+			obj.moveVec = new LStage.box2d.b2Vec2();
+			var a = window.angle * Math.PI / 180;
+			// console.log(a)
+			obj.moveVec.x = force * Math.cos(a);
+			obj.moveVec.y = -force * Math.sin(a);
+			obj.box2dBody.ApplyForce(obj.moveVec,obj.box2dBody.GetWorldCenter());
+		}
+		// console.log(window.angle);
+	}else{
+		window.angle = 1;
+	}
+}
+// 添加气球
+Main.prototype.addBallon = function(){
+	var radius = 20;
+	var s = this;
+	s.ballonObj = new LSprite();
+	s.ballonObj.x = 400;
+	s.ballonObj.exist = true;
+	s.ballonObj.y = 300;
+	s.ballonObj.addBodyCircle(radius,100,2,1)
+	s.ballonObj.setBodyMouseJoint(false);
+	s.addChild(s.ballonObj);
+	s.ballonObj.remove = function(){
+		s.ballonObj.exist = false;
+		s.ballonObj.parent.removeChild(s.ballonObj);
+	};
+	window.ballon = s.ballonObj;
+	world.ballanceBallon(window.ballon);
+	world.pushBallon(window.ballon);
+}
 Main.prototype.loop = function(event){
 	var s = event.target;
 	var bo = s.bicycleObj;
@@ -89,6 +138,20 @@ Main.prototype.loop = function(event){
 	}else if(s.y < LStage.height - s.sceneHeight){
 		s.y = LStage.height - s.sceneHeight;
 	}
-	//计算刚体坐标
-	LStage.box2d.synchronous();
+	
+	if(window.ballon.exist){
+		world.ballanceBallon(window.ballon);
+	}
 };
+Main.prototype.ballanceBallon = function(obj){
+	obj.moveVec = new LStage.box2d.b2Vec2();
+	obj.moveVec.x = 0;
+	obj.moveVec.y = -6.85;
+	obj.box2dBody.ApplyForce(obj.moveVec,obj.box2dBody.GetWorldCenter());
+};
+Main.prototype.pushBallon = function(obj){
+	obj.moveVec = new LStage.box2d.b2Vec2();
+	obj.moveVec.x = 0;
+	obj.moveVec.y = -100;
+	obj.box2dBody.ApplyForce(obj.moveVec,obj.box2dBody.GetWorldCenter());
+}
